@@ -17,6 +17,7 @@ lib/jboss.zip:
 	mkdir -p lib
 	curl -fLo lib/jboss.zip "$(jboss_src)"
 	echo "$(jboss_md5)  lib/jboss.zip" | md5sum --check
+	zip lib/jboss.zip -d java/\* functions control/\* setup
 
 java_plugin_gitrepo = git://github.com/CloudBees-community/java-clickstack.git
 

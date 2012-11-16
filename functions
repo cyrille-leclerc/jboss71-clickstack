@@ -16,9 +16,9 @@ create_app_skel() {
     ln -s $log_dir/current $app_dir/log/current
 }
 
-install_staxboss() {
-    echo "Installing staxboss"
-    unzip -qd $app_dir $plugin_dir/lib/staxboss.zip
+install_jboss() {
+    echo "Installing jboss"
+    unzip -qd $app_dir $plugin_dir/lib/jboss.zip
 }
 
 install_server_config() {
@@ -67,8 +67,8 @@ save_function write_java_opts write_java_opts_base
 
 write_java_opts() {
     write_java_opts_base
-    _opts_file="$control_dir/java-opts-15-staxboss"
-    echo "Writing staxboss options to $_opts_file"
+    _opts_file="$control_dir/java-opts-15-jboss71"
+    echo "Writing jboss options to $_opts_file"
     echo "-Djava.net.preferIPv4Stack=true" >> $_opts_file
     echo "-Dorg.jboss.resolver.warning=true" >> $_opts_file
     echo "-Dsun.rmi.dgc.client.gcInterval=3600000" >> $_opts_file
