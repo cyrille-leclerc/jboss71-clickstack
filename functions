@@ -1,0 +1,92 @@
+# -*-shell-script-*-
+
+. "$genapp_functions/core"
+. "$plugin_dir/java/functions"
+
+jboss_home=$app_dir/jboss
+
+create_app_skel() {
+    echo "Creating application skeleton at $app_dir"
+    chmod 770 $app_dir
+    mkdir -m 770 $app_dir/tmp
+    mkdir -m 770 $app_dir/log
+    mkdir -m 770 $app_dir/data
+    mkdir -m 770 $app_dir/deployments
+    mkdir -m 770 $app_dir/configuration
+    ln -s $log_dir/current $app_dir/log/current
+}
+
+install_staxboss() {
+    echo "Installing staxboss"
+    unzip -qd $app_dir $plugin_dir/lib/staxboss.zip
+}
+
+install_server_config() {
+    echo "Installing server config"
+    _xml_file="$app_dir/appserver.xml"
+    _xml=$(metadata jboss71_appserver_xml "")
+    if [ "$_xml" != "" ]; then
+        echo "$_xml" > $_xml_file
+    else
+	echo "appserver.xml not specified, skipping"
+    fi
+    cp $jboss_home/standalone/configuration/*.template $app_dir/configuration/
+}
+
+check_app_ear() {
+    if [ ! -e "$app_dir/app.ear" ]; then
+	echo "Missing $app_dir/app.ear" 1>&2
+	return 1
+    fi
+}
+
+install_app() {
+    cp $pkg_dir/app.ear $app_dir/app.ear
+    echo "app-deploy.ear" > $app_dir/deployments/app.ear.dodeploy
+    echo "Installing application app.ear to $app_dir"
+    _java=$(find_java)
+    _jar=$jboss_home/bin/stax-appserver-jboss7-jar-with-dependencies.jar
+    $_java -jar $_jar \
+      -dir $app_dir \
+      -install $app_dir/app.ear \
+      -config $app_dir/appserver.xml
+}
+
+write_config() {
+    _config="$control_dir/config"
+    echo "Writing configuration to $_config"
+    _java=$(find_java)
+    echo "Using Java at $_java"
+    echo "app_dir=$app_dir" >> $_config
+    echo "port=$app_port" >> $_config
+    echo "java=$_java" >> $_config
+    echo "jboss_home=$jboss_home" >> $_config
+}
+
+save_function write_java_opts write_java_opts_base
+
+write_java_opts() {
+    write_java_opts_base
+    _opts_file="$control_dir/java-opts-15-staxboss"
+    echo "Writing staxboss options to $_opts_file"
+    echo "-Djava.net.preferIPv4Stack=true" >> $_opts_file
+    echo "-Dorg.jboss.resolver.warning=true" >> $_opts_file
+    echo "-Dsun.rmi.dgc.client.gcInterval=3600000" >> $_opts_file
+    echo "-Dsun.rmi.dgc.server.gcInterval=3600000" >> $_opts_file
+    echo "-Djboss.home.dir=$jboss_home" >> $_opts_file
+    echo "-Dcom.cloudbees.appdir=$app_dir" >> $_opts_file
+    echo "-Dorg.jboss.boot.log.file=$app_dir/log/boot.log" >> $_opts_file
+    echo "-Dlogging.configuration=file:$jboss_home/standalone/configuration/logging.properties" >> $_opts_file
+    echo "-Djboss.server.config.dir=$app_dir/configuration" >> $_opts_file
+    echo "-Djboss.server.data.dir=$app_dir/data" >> $_opts_file
+    echo "-Djboss.server.log.dir=$app_dir/log" >> $_opts_file
+    echo "-Djboss.server.temp.dir=$app_dir/tmp" >> $_opts_file
+    echo "-Dhttp.port=$app_port" >> $_opts_file
+}
+
+write_control() {
+    echo "Writing control scripts to $control_dir"
+    install -m 550 $plugin_dir/control/start $control_dir
+    install -m 550 $plugin_dir/control/stats-appstat $control_dir
+    install -m 750 $plugin_dir/java/control/send_sigquit $control_dir
+}

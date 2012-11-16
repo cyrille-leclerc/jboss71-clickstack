@@ -1,0 +1,20 @@
+#!/bin/bash
+set -e
+set -u
+
+control_dir="$(dirname $0)"
+. $control_dir/config
+. $control_dir/java/functions
+
+jars=(
+    $jboss_home/bin/stax-bootstrap-jboss7-jar-with-dependencies.jar
+    $jboss_home/jboss-modules.jar)
+cp="$(join_classpath jars[@])"
+class=net.stax.appserver.bootstrap.jboss7.Bootstrap
+java_opts="$(java_opts $control_dir)"
+jboss_modules_system_pkgs="-Djboss.modules.system.pkgs=org.jboss.byteman"
+for file in `ls $control_dir/jboss-modules-system-pkgs-* 2> /dev/null`; do
+    jboss_modules_system_pkgs="$jboss_modules_system_pkgs,`cat $file`"
+done
+
+exec bash -c "$java $java_opts $jboss_modules_system_pkgs -cp $cp $class"
