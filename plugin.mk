@@ -19,7 +19,9 @@ clean-pkg: plugin_name-var
 	rm -rf pkg
 	rm -f $(plugin_name).zip
 
-publish: plugin_name-var publish_url-var s3cfg s3cmd pkg
+publish: plugin_name-var publish_url-var s3cfg s3cmd pkg republish
+
+republish:
 	s3cmd put -Pc s3cfg $(plugin_name).zip $(publish_url)
 
 s3cfg:
