@@ -9,7 +9,7 @@ pkg_files = README LICENSE setup functions control lib java
 
 include plugin.mk
 
-jboss_ver = 1.1.1
+jboss_ver = 1.1.2
 jboss_src = http://s3.amazonaws.com/cloudbees-downloads/clickstack/staxboss71-plugin-$(jboss_ver).zip
 jboss_md5 = 76765b5a8bf81bc85d3f6ca9a957f22f
 
