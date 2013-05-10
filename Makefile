@@ -11,7 +11,7 @@ include plugin.mk
 
 jboss_ver = 1.1.2
 jboss_src = http://s3.amazonaws.com/cloudbees-downloads/clickstack/staxboss71-plugin-$(jboss_ver).zip
-jboss_md5 = 76765b5a8bf81bc85d3f6ca9a957f22f
+jboss_md5 = 8a86e74614858c4fccb70050d474cc62
 
 lib/jboss.zip:
 	mkdir -p lib
